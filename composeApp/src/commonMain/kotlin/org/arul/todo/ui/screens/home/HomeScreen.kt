@@ -1,8 +1,13 @@
 package org.arul.todo.ui.screens.home
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -21,10 +26,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import org.arul.todo.data.RequestState
 import org.arul.todo.data.models.TodoTask
+import org.arul.todo.ui.components.ErrorIndicator
+import org.arul.todo.ui.components.LoadingIndicator
+import org.arul.todo.ui.components.TaskView
 
 class HomeScreen: Screen{
 
@@ -116,6 +125,54 @@ fun DisplayTasks(
                     Text(text = "No")
                 }
             }
+        )
+    }
+    Column (
+        modifier = Modifier.fillMaxWidth()
+    ){
+        Text(
+            text = if(showActive) "Active Tasks" else "Completed Tasks",
+            fontSize = MaterialTheme.typography.titleMedium.fontSize,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        tasks.DisplayResult(
+            onLoading = { LoadingIndicator() },
+            onError = { ErrorIndicator(message = it) },
+            onSuccess = {
+                if(it.isNotEmpty()){
+
+                    LazyColumn(
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    ) {
+                        items(
+                            items = it,
+                            key = { task -> task._id.toHexString() }
+                        ){ task ->
+                            TaskView(
+                                showActive = showActive,
+                                task = task,
+                                onSelectedTask = { onSelectedTask?.invoke(task) },
+                                onCompleteTask = { selectedTask, completed ->
+                                    onCompleteTask(selectedTask, completed)
+                                },
+                                onFavoriteTask = { selectedTask, favorite ->
+                                    onFavoriteTask?.invoke(selectedTask, favorite)
+                                },
+                                onDeleteTask = { selectedTask ->
+                                    deletionOfTask = selectedTask
+                                    showDialog = true
+                                }
+                            )
+                        }
+                    }
+                }else{
+                    ErrorIndicator()
+                }
+            }
+
         )
     }
 }
