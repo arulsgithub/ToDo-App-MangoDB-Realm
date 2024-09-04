@@ -13,6 +13,7 @@ import cafe.adriel.voyager.transitions.SlideTransition
 import org.arul.todo.data.MongoDB
 import org.arul.todo.ui.screens.home.HomeScreen
 import org.arul.todo.ui.screens.home.HomeViewModel
+import org.arul.todo.ui.screens.task.TaskViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -53,10 +54,12 @@ fun App() {
 val mongoModule = module {
     single { MongoDB() }
     factory { HomeViewModel(get()) }
+    factory { TaskViewModel(get()) }
 }
 
 fun intializeKoin(){
     startKoin {
+
         modules(mongoModule)
     }
 }
